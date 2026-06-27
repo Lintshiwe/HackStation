@@ -1,0 +1,11 @@
+services:
+  - type: worker
+    name: hackstation-discord-bot
+    env: node
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: CONVEX_URL
+        sync: false

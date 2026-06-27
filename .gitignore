@@ -8,3 +8,10 @@ desktop/.gradle/
 desktop/bin/
 code.txt
 n8n/node_modules/
+secrets/
+import*
+web/public/openwa-qr.png
+web/public/qr-display.html
+web/public/whatsapp-qr.png
+web/public/openwa-qr.png
+web/public/whatsapp-qr.png

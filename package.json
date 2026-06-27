@@ -1,0 +1,11 @@
+{
+  "name": "hackstation",
+  "private": true,
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy"
+  },
+  "dependencies": {
+    "convex": "^1.14.0"
+  }
+}

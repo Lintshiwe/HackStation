@@ -33,3 +33,56 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// ── jpackage native installers ──
+
+def platform = org.gradle.internal.os.OperatingSystem.current()
+
+task packageApp(type: Exec) {
+    dependsOn jar
+    group = "distribution"
+
+    doFirst {
+        def outputDir = file("$buildDir/dist")
+        def appVersion = project.version
+        def inputDir = file("$buildDir/libs")
+        def mainJar = "HackStation-${appVersion}.jar"
+        def jdkHome = System.getenv("JAVA_HOME") ?: System.getProperty("java.home")
+        def iconPath = ""
+
+        if (platform.isWindows()) {
+            def ico = file("$projectDir/HackStation.ico")
+            if (ico.exists()) iconPath = ico.path
+        } else if (platform.isMacOsX()) {
+            def icns = file("$projectDir/HackStation.icns")
+            if (icns.exists()) iconPath = icns.path
+        } else {
+            def png = file("$projectDir/HackStation-logo.png")
+            if (png.exists()) iconPath = png.path
+        }
+
+        def typeFlag = platform.isWindows() ? "--type msi" :
+                        platform.isMacOsX() ? "--type dmg" :
+                        "--type deb"
+
+        executable = "jpackage"
+        args = [
+            typeFlag,
+            "--name", "HackStation",
+            "--app-version", appVersion,
+            "--vendor", "Hackathon",
+            "--input", inputDir,
+            "--main-jar", mainJar,
+            "--main-class", "com.hackathon.App",
+            "--runtime-image", jdkHome,
+            "--dest", outputDir,
+            "--java-options", "--add-modules=javafx.controls,javafx.fxml",
+            "--description", "Hackathon management platform",
+            "--copyright", "Copyright (c) 2026 Hackathon"
+        ]
+        if (!iconPath.isEmpty()) {
+            args.add("--icon")
+            args.add(iconPath)
+        }
+    }
+}

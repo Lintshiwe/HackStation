@@ -1,0 +1,197 @@
+{
+  "name": "Group Sync",
+  "nodes": [
+    {
+      "id": "e5f6a7b8-5555-4000-8000-000000000001",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e5f6a7b8-5555-4000-8000-000000000002",
+      "name": "Get Active Events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [250, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/query/queries/events:listEvents",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e5f6a7b8-5555-4000-8000-000000000003",
+      "name": "Get Event Groups",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/query/queries/groups:listGroupsByEvent",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "args",
+              "value": "{\"eventId\": \"{{ $json._id }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e5f6a7b8-5555-4000-8000-000000000004",
+      "name": "Transform to Sheet Rows",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "parameters": {
+        "functionCode": "// Transform group data into Google Sheets rows\nconst groups = $input.all();\nconst rows = [['Group ID', 'Group Name', 'Event ID', 'Project Description', 'Repo URL', 'Demo URL', 'Max Members', 'Created At']];\n\nfor (const item of groups) {\n  const g = item.json;\n  rows.push([\n    g._id,\n    g.name,\n    g.eventId,\n    g.projectDescription || '',\n    g.repoUrl || '',\n    g.demoUrl || '',\n    String(g.maxMembers),\n    new Date(g._creationTime).toISOString()\n  ]);\n}\n\nreturn [{ json: { values: rows } }];"
+      }
+    },
+    {
+      "id": "e5f6a7b8-5555-4000-8000-000000000005",
+      "name": "Sync to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1000, 300],
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "{{ $env.GOOGLE_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Groups"
+        },
+        "handlingExtraData": "insertInNewColumn",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "0": "Group ID",
+            "1": "Group Name",
+            "2": "Event ID",
+            "3": "Project Description",
+            "4": "Repo URL",
+            "5": "Demo URL",
+            "6": "Max Members",
+            "7": "Created At"
+          }
+        },
+        "dataMode": "nothing",
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "dateFormat": "DD/MM/YYYY",
+          "valueInputOption": "USER_ENTERED"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Active Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Events": {
+      "main": [
+        [
+          {
+            "node": "Get Event Groups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Event Groups": {
+      "main": [
+        [
+          {
+            "node": "Transform to Sheet Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform to Sheet Rows": {
+      "main": [
+        [
+          {
+            "node": "Sync to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "tag-sync",
+      "name": "sync"
+    },
+    {
+      "id": "tag-sheets",
+      "name": "sheets"
+    }
+  ]
+}

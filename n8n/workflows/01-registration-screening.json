@@ -1,0 +1,124 @@
+{
+  "name": "Registration Screening",
+  "nodes": [
+    {
+      "id": "a1b2c3d4-1111-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "registration-screening",
+        "options": {},
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "responseBinary": false
+      },
+      "webhookId": "registration-screening"
+    },
+    {
+      "id": "a1b2c3d4-1111-4000-8000-000000000002",
+      "name": "Calculate Screening Score",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "functionCode": "// Input: registration data with email, skills, experience, eventId\n// Uses event screening rules to calculate a score\n\nconst registration = $input.first().json;\n\nconst requiredSkills = registration.requiredSkills || [];\nconst applicantSkills = registration.skills || [];\nconst experience = registration.experience || 'beginner';\n\n// Skills match score (0-60)\nconst matchedSkills = requiredSkills.filter(s =>\n  applicantSkills.map((as: string) => as.toLowerCase()).includes(s.toLowerCase())\n);\nconst skillsScore = requiredSkills.length > 0\n  ? Math.round((matchedSkills.length / requiredSkills.length) * 60)\n  : 30;\n\n// Experience score (0-40)\nconst experienceLevels: Record<string, number> = {\n  'beginner': 10,\n  'intermediate': 25,\n  'advanced': 35,\n  'expert': 40\n};\nconst experienceScore = experienceLevels[experience.toLowerCase()] || 10;\n\nconst totalScore = Math.min(skillsScore + experienceScore, 100);\nconst status = totalScore >= 50 ? 'accepted' : 'rejected';\n\nreturn [\n  {\n    json: {\n      registrationId: registration.registrationId,\n      email: registration.email,\n      eventId: registration.eventId,\n      status: status,\n      screeningScore: totalScore,\n      skillsMatch: matchedSkills,\n      experienceLevel: experience\n    }\n  }\n];"
+      }
+    },
+    {
+      "id": "a1b2c3d4-1111-4000-8000-000000000003",
+      "name": "Update Registration Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/n8n/screening-complete",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "registrationId",
+              "value": "={{ $json.registrationId }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "name": "screeningScore",
+              "value": "={{ $json.screeningScore }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "eventId",
+              "value": "={{ $json.eventId }}"
+            }
+          ]
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "n8n-nodes-base.httpRequest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Calculate Screening Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Screening Score": {
+      "main": [
+        [
+          {
+            "node": "Update Registration Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "tag-registration",
+      "name": "registration"
+    },
+    {
+      "id": "tag-screening",
+      "name": "screening"
+    }
+  ]
+}

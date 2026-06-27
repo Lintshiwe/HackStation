@@ -1,0 +1,199 @@
+{
+  "name": "Discord Invite",
+  "nodes": [
+    {
+      "id": "b2c3d4e5-2222-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "discord-invite",
+        "options": {},
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "responseBinary": false
+      },
+      "webhookId": "discord-invite"
+    },
+    {
+      "id": "b2c3d4e5-2222-4000-8000-000000000002",
+      "name": "Has Discord Username?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.discordUsername }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b2c3d4e5-2222-4000-8000-000000000003",
+      "name": "Generate Invite Link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 200],
+      "parameters": {
+        "url": "={{ $env.DISCORD_API_URL || 'https://discord.com/api/v10' }}/guilds/{{ $env.DISCORD_GUILD_ID }}/invites",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "max_age",
+              "value": 86400
+            },
+            {
+              "name": "max_uses",
+              "value": 1
+            },
+            {
+              "name": "unique",
+              "value": true
+            },
+            {
+              "name": "target_type",
+              "value": null
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "nodeCredentialType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bot {{ $env.DISCORD_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b2c3d4e5-2222-4000-8000-000000000004",
+      "name": "Send Invite Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [750, 200],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/n8n/send-invite",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "inviteLink",
+              "value": "={{ $json.code ? 'https://discord.gg/' + $json.code : $json.inviteUrl }}"
+            },
+            {
+              "name": "eventId",
+              "value": "={{ $json.eventId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b2c3d4e5-2222-4000-8000-000000000005",
+      "name": "No Discord Username",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [500, 450],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Has Discord Username?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Discord Username?": {
+      "main": [
+        [
+          {
+            "node": "Generate Invite Link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Discord Username",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Invite Link": {
+      "main": [
+        [
+          {
+            "node": "Send Invite Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "tag-discord",
+      "name": "discord"
+    },
+    {
+      "id": "tag-invite",
+      "name": "invite"
+    }
+  ]
+}

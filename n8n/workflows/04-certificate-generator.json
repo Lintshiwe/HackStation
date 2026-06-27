@@ -1,0 +1,233 @@
+{
+  "name": "Certificate Generator",
+  "nodes": [
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "certificate-generator",
+        "options": {},
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "responseBinary": false
+      },
+      "webhookId": "certificate-generator"
+    },
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000002",
+      "name": "Get Event Registrations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [250, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/query/queries/registrations:listByEvent",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "args",
+              "value": "{\"eventId\": \"{{ $json.eventId }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000003",
+      "name": "Filter Accepted Registrations",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "parameters": {
+        "functionCode": "// Filter only accepted/hacker registrations\nconst eventData = $input.first().json;\nconst registrations = eventData.data || eventData.result || [];\nconst eventName = $('Webhook').first().json.eventName || 'HackStation Event';\n\nconst accepted = registrations.filter(r => r.status === 'accepted');\n\nreturn accepted.map(r => ({\n  json: {\n    registrationId: r._id,\n    userId: r.userId,\n    email: r.email,\n    name: r.name,\n    eventName: eventName,\n    eventId: r.eventId,\n    participationDate: new Date().toISOString().split('T')[0]\n  }\n}));"
+      }
+    },
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000004",
+      "name": "Generate Certificate",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "parameters": {
+        "functionCode": "// Generate a text-based certificate for each participant\nconst participant = $input.first().json;\nconst certId = 'CERT-' + participant.eventId.substring(0, 8).toUpperCase() + '-' + participant.registrationId.substring(0, 8).toUpperCase();\n\nconst certificate = {\n  certificateId: certId,\n  eventName: participant.eventName,\n  participantName: participant.name,\n  email: participant.email,\n  issuedAt: Date.now(),\n  issuedDate: participant.participationDate,\n  type: 'participation',\n  text: [\n    '========================================',\n    '         CERTIFICATE OF PARTICIPATION',\n    '========================================',\n    '',\n    '  This is to certify that',\n    '',\n    `       ${participant.name.toUpperCase()}`, \n    '',\n    '  has successfully participated in',\n    '',\n    `       ${participant.eventName}`, \n    '',\n    `  Date: ${participant.participationDate}`, \n    '',\n    `  Certificate ID: ${certId}`,\n    '',\n    '========================================',\n    '           HackStation Platform',\n    '========================================'\n  ].join('\\n')\n};\n\nreturn [{ json: certificate }];"
+      }
+    },
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000005",
+      "name": "Store Certificate in Convex",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/mutation/mutations/badges:awardBadge",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "args",
+              "value": "{\"userId\": \"{{ $json.userId }}\", \"eventId\": \"{{ $json.eventId }}\", \"badge\": \"{{ $json.certificateId }}\"}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d4e5f6a7-4444-4000-8000-000000000006",
+      "name": "Send Certificate Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 300],
+      "parameters": {
+        "url": "={{ $env.CONVEX_URL }}/api/n8n/send-certificate",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.participantName }}"
+            },
+            {
+              "name": "certificateId",
+              "value": "={{ $json.certificateId }}"
+            },
+            {
+              "name": "eventName",
+              "value": "={{ $json.eventName }}"
+            },
+            {
+              "name": "certificateText",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Event Registrations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Event Registrations": {
+      "main": [
+        [
+          {
+            "node": "Filter Accepted Registrations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Accepted Registrations": {
+      "main": [
+        [
+          {
+            "node": "Generate Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Certificate": {
+      "main": [
+        [
+          {
+            "node": "Store Certificate in Convex",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Certificate in Convex": {
+      "main": [
+        [
+          {
+            "node": "Send Certificate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "tag-certificate",
+      "name": "certificate"
+    },
+    {
+      "id": "tag-badge",
+      "name": "badge"
+    }
+  ]
+}

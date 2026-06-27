@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="768" prefWidth="1024" style="-fx-background-color: #0f0f23;" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hackathon.controllers.TimerController">
+
+    <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: #1a1a2e; -fx-padding: 16 24;">
+        <Label style="-fx-text-fill: #e94560;" text="HackStation" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="20"/>
+            </font>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button mnemonicParsing="false" onAction="#goToDashboard"
+                style="-fx-background-color: #16213e; -fx-text-fill: white;" text="Dashboard"/>
+        <Button mnemonicParsing="false" onAction="#goToChat"
+                style="-fx-background-color: #16213e; -fx-text-fill: white;" text="Chat"/>
+    </HBox>
+
+    <VBox alignment="CENTER" spacing="24" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="40" left="40" right="40" top="24"/>
+        </padding>
+
+        <Label style="-fx-text-fill: white;" text="Hackathon Timer">
+            <font>
+                <Font name="System Bold" size="28"/>
+            </font>
+        </Label>
+
+        <Label fx:id="timerDisplay" alignment="CENTER" style="-fx-text-fill: #e94560;" text="00:00:00"
+               textAlignment="CENTER">
+            <font>
+                <Font name="System Bold" size="72"/>
+            </font>
+        </Label>
+
+        <ProgressBar fx:id="phaseProgress" prefWidth="600" progress="0.0"
+                     style="-fx-accent: #e94560;"/>
+
+        <Label style="-fx-text-fill: #a0a0b0;" text="Phase Progress"/>
+
+        <VBox fx:id="phaseList" spacing="8" style="-fx-background-color: #1a1a2e; -fx-background-radius: 8; -fx-padding: 16;">
+            <padding>
+                <Insets left="16" right="16" top="8" bottom="8"/>
+            </padding>
+        </VBox>
+
+        <HBox alignment="CENTER" spacing="16">
+            <Button fx:id="startPauseButton" mnemonicParsing="false" onAction="#handleStartPause"
+                    prefWidth="120" style="-fx-background-color: #e94560; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12;"
+                    text="Start"/>
+            <Button fx:id="resetButton" mnemonicParsing="false" onAction="#handleReset"
+                    prefWidth="120" style="-fx-background-color: #16213e; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12;"
+                    text="Reset"/>
+        </HBox>
+    </VBox>
+</VBox>

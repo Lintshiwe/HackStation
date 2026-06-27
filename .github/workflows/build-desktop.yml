@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -57,6 +58,8 @@ jobs:
 
       - name: Build native installer
         run: |
+          ICON_ARG=""
+          [ -f "desktop/${{ matrix.icon }}" ] && ICON_ARG="--icon desktop/${{ matrix.icon }}"
           jpackage \
             --type ${{ matrix.type }} \
             --name HackStation \
@@ -65,15 +68,15 @@ jobs:
             --input desktop/build/libs \
             --main-jar HackStation-1.0.0.jar \
             --main-class com.hackathon.App \
-            --runtime-image $JAVA_HOME \
             --dest desktop/build/dist \
             --java-options "--add-modules=javafx.controls,javafx.fxml" \
             --description "Hackathon management platform" \
             --copyright "Copyright (c) 2026 Hackathon" \
-            ${{ matrix.icon && format('--icon desktop/{0}', matrix.icon) || '' }}
+            $ICON_ARG
         shell: bash
 
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: HackStation-${{ matrix.os }}
           path: desktop/build/dist/*${{ matrix.ext }}

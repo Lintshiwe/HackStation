@@ -23,8 +23,8 @@ class ConvexClient {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message || data.error);
-    return data;
+    if (data.status === 'error') throw new Error(data.errorMessage || 'Server error');
+    return data.value ?? data;
   }
 
   async query(name, args = {}) {

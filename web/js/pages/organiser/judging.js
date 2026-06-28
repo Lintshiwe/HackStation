@@ -1,6 +1,6 @@
 window.organiserPages = window.organiserPages || {};
 
-const EVENT_ID = 'event1';
+var EVENT_ID = 'event1';
 
 window.organiserPages.renderJudging = async function () {
   const [criteria, groups, leaderboard] = await Promise.all([

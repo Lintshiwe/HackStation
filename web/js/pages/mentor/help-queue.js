@@ -1,5 +1,5 @@
 window.mentorPages = window.mentorPages || {};
-const EVENT_ID = 'default';
+var EVENT_ID = 'default';
 let _filter = 'all';
 
 async function reRender() {

@@ -1,5 +1,5 @@
 window.judgePages = window.judgePages || {};
-const EVENT_ID = 'default';
+var EVENT_ID = 'default';
 
 let _groupId = null;
 

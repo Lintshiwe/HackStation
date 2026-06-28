@@ -1,6 +1,6 @@
 window.organiserPages = window.organiserPages || {};
 
-const EVENT_ID = 'event1';
+var EVENT_ID = 'event1';
 
 window.organiserPages.renderWheel = async function () {
   const members = await convex.query('events:getMembers', { eventId: EVENT_ID }).catch(() => []);

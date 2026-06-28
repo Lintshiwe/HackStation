@@ -1,6 +1,6 @@
 window.organiserPages = window.organiserPages || {};
 
-const EVENT_ID = 'event1';
+var EVENT_ID = 'event1';
 
 window.organiserPages.renderRegistrations = async function () {
   const [registrations, event] = await Promise.all([

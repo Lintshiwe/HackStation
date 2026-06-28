@@ -1,5 +1,5 @@
 window.judgePages = window.judgePages || {};
-const EVENT_ID = 'default';
+var EVENT_ID = 'default';
 
 window.judgePages.renderProjects = async function() {
   const judge = convex.getCurrentUser();

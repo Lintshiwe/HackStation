@@ -1,6 +1,6 @@
 window.organiserPages = window.organiserPages || {};
 
-const EVENT_ID = 'event1';
+var EVENT_ID = 'event1';
 
 window.organiserPages.renderTimer = async function () {
   const timerData = await convex.query('events:getTimer', { eventId: EVENT_ID }).catch(() => null);

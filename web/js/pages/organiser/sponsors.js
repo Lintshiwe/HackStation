@@ -1,6 +1,6 @@
 window.organiserPages = window.organiserPages || {};
 
-const EVENT_ID = 'event1';
+var EVENT_ID = 'event1';
 
 window.organiserPages.renderSponsors = async function () {
   const sponsors = await convex.query('sponsors:list', { eventId: EVENT_ID }).catch(() => []);

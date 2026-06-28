@@ -158,6 +158,7 @@ function renderShell(pageContent) {
           <button class="btn btn-ghost btn-sm" onclick="toggleSidebar()">
             <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
           </button>
+          <img src="public/images/HacStationLogo.png" alt="HS" style="height: 28px; margin-left: 8px;">
           <div style="flex: 1;"></div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span class="avatar avatar-sm">${Utils.getInitials(user.name)}</span>

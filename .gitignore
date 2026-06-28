@@ -15,4 +15,6 @@ web/public/qr-display.html
 web/public/whatsapp-qr.png
 web/public/openwa-qr.png
 web/public/whatsapp-qr.png
-\n.env.local
+
+.env.local
+docs/superpowers/

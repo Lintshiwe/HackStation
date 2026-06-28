@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const config = require('./config');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 const client = new Client({
   intents: [
@@ -68,5 +69,12 @@ client.on('messageCreate', async message => {
     }
   }
 });
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ status: 'ok', bot: client.user?.tag || 'connecting' }));
+});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Health server running on port ${PORT}`));
 
 client.login(config.token);

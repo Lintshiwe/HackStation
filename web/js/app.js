@@ -22,7 +22,7 @@ function renderLogin() {
           <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;">Sign In</button>
         </form>
         <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary);">
-          Don't have an account? <a href="#" onclick="router.navigate('/register')" style="color: var(--accent); text-decoration: none;">Register</a>
+          Don't have an account? <a href="javascript:void(0)" onclick="router.navigate('/register')" style="color: var(--accent); text-decoration: none;">Register</a>
         </p>
       </div>
     </div>
@@ -61,7 +61,7 @@ function renderRegister() {
           <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;">Create Account</button>
         </form>
         <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary);">
-          Already have an account? <a href="#" onclick="router.navigate('/login')" style="color: var(--accent); text-decoration: none;">Sign in</a>
+          Already have an account? <a href="javascript:void(0)" onclick="router.navigate('/login')" style="color: var(--accent); text-decoration: none;">Sign in</a>
         </p>
       </div>
     </div>

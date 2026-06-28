@@ -6,8 +6,8 @@ export const listMessages = query({
     channelId: v.id("channels"),
     paginationOpts: v.optional(v.object({
       numItems: v.number(),
-      cursor: v.optional(v.string()),
-      endCursor: v.optional(v.string()),
+      cursor: v.union(v.string(), v.null()),
+      endCursor: v.union(v.string(), v.null()),
       maximumItemsRead: v.optional(v.number()),
     })),
   },

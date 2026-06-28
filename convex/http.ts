@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
+import { api } from "./_generated/api";
 
 const http = httpRouter();
 
@@ -23,7 +24,7 @@ http.route({
     const { registrationId, status, screeningScore, email, eventId } = body;
 
     if (registrationId) {
-      await ctx.runMutation("mutations/registrations:updateRegistrationStatus", {
+      await ctx.runMutation(api.mutations.registrations.updateRegistrationStatus, {
         registrationId,
         status: status ?? "accepted",
         screeningScore,
@@ -35,7 +36,7 @@ http.route({
     }
 
     if (email && eventId) {
-      const registration = await ctx.runQuery("queries/registrations:getByEmailEvent", {
+      const registration = await ctx.runQuery(api.queries.registrations.getByEmailEvent, {
         email,
         eventId,
       });
@@ -46,7 +47,7 @@ http.route({
         });
       }
 
-      await ctx.runMutation("mutations/registrations:updateRegistrationStatus", {
+      await ctx.runMutation(api.mutations.registrations.updateRegistrationStatus, {
         registrationId: registration._id,
         status: status ?? "accepted",
         screeningScore,

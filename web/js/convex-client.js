@@ -1,6 +1,6 @@
 class ConvexClient {
   constructor(url) {
-    this.url = url || 'http://localhost:8181';
+    this.url = url || window.__CONVEX_URL__ || 'https://amiable-crocodile-549.convex.cloud';
     this.authToken = null;
   }
 

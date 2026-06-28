@@ -66,7 +66,7 @@ export default defineSchema({
     content: v.string(),
     type: v.union(v.literal("text"), v.literal("image"), v.literal("system")),
     deletedAt: v.optional(v.number()),
-  }).index("by_channel", ["channelId", "_creationTime"]),
+  }).index("by_channel", ["channelId"]),
 
   announcements: defineTable({
     eventId: v.id("events"),
@@ -74,7 +74,7 @@ export default defineSchema({
     title: v.string(),
     content: v.string(),
     priority: v.union(v.literal("normal"), v.literal("important"), v.literal("urgent")),
-  }).index("by_event", ["eventId", "_creationTime"]),
+  }).index("by_event", ["eventId"]),
 
   alerts: defineTable({
     eventId: v.id("events"),

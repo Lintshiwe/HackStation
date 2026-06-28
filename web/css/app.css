@@ -93,4 +93,5 @@ tr:hover { background: var(--bg-secondary); }
   width: 400px; padding: 40px; border: 1px solid var(--border);
 }
 .auth-card .logo { text-align: center; margin-bottom: 32px; }
-.auth-card .logo img { height: 96px; }
+.auth-card .logo img { height: 96px; display: block; margin: 0 auto; }
+.auth-card .logo h2 { margin-top: 20px; }

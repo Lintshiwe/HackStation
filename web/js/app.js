@@ -19,7 +19,7 @@ function renderLogin() {
             <label>Password</label>
             <input type="password" class="input" id="loginPassword" placeholder="Enter your password" required>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;">Sign In</button>
+          <button type="submit" class="btn btn-primary btn-lg" id="loginBtn" style="width: 100%; justify-content: center;">Sign In</button>
         </form>
         <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary);">
           Don't have an account? <a href="javascript:void(0)" onclick="router.navigate('/register')" style="color: var(--accent); text-decoration: none;">Register</a>
@@ -29,9 +29,13 @@ function renderLogin() {
   `;
   document.getElementById('loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.innerHTML = 'Signing in...';
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    Auth.handleLogin(email, password);
+    Auth.handleLogin(email, password).finally(() => {
+      btn.disabled = false; btn.innerHTML = 'Sign In';
+    });
   });
 }
 
@@ -58,7 +62,7 @@ function renderRegister() {
             <label>Password</label>
             <input type="password" class="input" id="regPassword" placeholder="Create a password" required minlength="6">
           </div>
-          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center;">Create Account</button>
+          <button type="submit" class="btn btn-primary btn-lg" id="registerBtn" style="width: 100%; justify-content: center;">Create Account</button>
         </form>
         <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary);">
           Already have an account? <a href="javascript:void(0)" onclick="router.navigate('/login')" style="color: var(--accent); text-decoration: none;">Sign in</a>
@@ -68,10 +72,14 @@ function renderRegister() {
   `;
   document.getElementById('registerForm').addEventListener('submit', (e) => {
     e.preventDefault();
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true; btn.innerHTML = 'Creating account...';
     const name = document.getElementById('regName').value;
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
-    Auth.handleRegister(email, name, password);
+    Auth.handleRegister(email, name, password).finally(() => {
+      btn.disabled = false; btn.innerHTML = 'Create Account';
+    });
   });
 }
 

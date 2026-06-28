@@ -38,9 +38,10 @@ const Auth = {
 
   async handleRegister(email, name, password) {
     try {
-      await convex.register(email, name, password);
-      Utils.toast('Account created! Please log in.', 'success');
-      router.navigate('/login');
+      const result = await convex.register(email, name, password);
+      sessionStorage.setItem('hackstation_user', JSON.stringify(result));
+      Utils.toast('Account created! Welcome!', 'success');
+      router.navigate(`/${result.role}/home`);
     } catch (err) {
       Utils.toast(err.message || 'Registration failed', 'error');
     }

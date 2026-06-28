@@ -100,7 +100,7 @@ echo "--- 12. DEPLOYMENT ---"
 t "netlify" test -f /home/ntoampi/Documents/Projects/HackStation/web/netlify.toml
 t "gh: deploy-web" test -f /home/ntoampi/Documents/Projects/HackStation/.github/workflows/deploy-web.yml
 t "gh: deploy-convex" test -f /home/ntoampi/Documents/Projects/HackStation/.github/workflows/deploy-convex.yml
-t "gh: deploy-bot" test -f /home/ntoampi/Documents/Projects/HackStation/.github/workflows/deploy-bot.yml
+t "gh: keepalive" test -f /home/ntoampi/Documents/Projects/HackStation/.github/workflows/keepalive-discord-bot.yml
 t "gh: build-desktop" test -f /home/ntoampi/Documents/Projects/HackStation/.github/workflows/build-desktop.yml
 
 echo ""

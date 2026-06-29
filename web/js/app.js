@@ -1,5 +1,82 @@
 const app = document.getElementById('app');
 
+// Connection Error Overlay
+const ConnectionOverlay = {
+  show() {
+    if (document.getElementById('offlineOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'offlineOverlay';
+    overlay.className = 'offline-overlay';
+    overlay.innerHTML = `
+      <div class="offline-icon">
+        <i data-lucide="wifi-off" style="width: 56px; height: 56px; stroke-width: 2;"></i>
+      </div>
+      <h2>No Internet Connection</h2>
+      <p>Your internet connection appears to be offline. Please check your connection and try again.</p>
+      <button class="btn-retry" onclick="ConnectionOverlay.retry()">Try Again</button>
+    `;
+    document.body.appendChild(overlay);
+    lucide.createIcons();
+  },
+  hide() {
+    const overlay = document.getElementById('offlineOverlay');
+    if (overlay) overlay.remove();
+  },
+  async retry() {
+    const btn = document.querySelector('.btn-retry');
+    if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+    try {
+      const res = await fetch('https://amiable-crocodile-549.convex.cloud/api/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        this.hide();
+        return;
+      }
+    } catch {}
+    if (btn) { btn.disabled = false; btn.textContent = 'Try Again'; }
+    Utils.toast('Still unable to connect. Check your network.', 'error');
+  }
+};
+
+function isAuthPage() {
+  const path = router.getCurrentPath();
+  return path === '/login' || path === '/register';
+}
+
+function handleConnectionChange() {
+  if (navigator.onLine) {
+    ConnectionOverlay.hide();
+  } else if (convex.getCurrentUser()) {
+    ConnectionOverlay.show();
+  }
+}
+
+window.addEventListener('online', handleConnectionChange);
+window.addEventListener('offline', handleConnectionChange);
+
+// Wrap convex methods to catch network errors
+(() => {
+  const origQuery = convex.query.bind(convex);
+  const origMutation = convex.mutation.bind(convex);
+  convex.query = async (...args) => {
+    try { return await origQuery(...args); }
+    catch (err) {
+      if (err.message && (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        if (convex.getCurrentUser()) ConnectionOverlay.show();
+      }
+      throw err;
+    }
+  };
+  convex.mutation = async (...args) => {
+    try { return await origMutation(...args); }
+    catch (err) {
+      if (err.message && (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        if (convex.getCurrentUser()) ConnectionOverlay.show();
+      }
+      throw err;
+    }
+  };
+})();
+
 function renderLogin() {
   if (Auth.redirectOnLogin()) return;
   app.innerHTML = `
@@ -202,11 +279,16 @@ const unknownPage = () => { app.innerHTML = '<div class="empty-state"><h3>404</h
 // Register routes
 router.register('/login', () => renderLogin());
 router.register('/register', () => renderRegister());
+router.register('/register/event', async () => {
+  app.innerHTML = await window.eventRegistration.render();
+  window.eventRegistration.init();
+});
 router.register('/hacker/home', () => renderWithShell('hacker-home', window.hackerPages?.renderHome));
 router.register('/hacker/chat', () => renderWithShell('hacker-chat', window.hackerPages?.renderChat));
 router.register('/hacker/team', () => renderWithShell('hacker-team', window.hackerPages?.renderTeam));
 router.register('/hacker/schedule', () => renderWithShell('hacker-schedule', window.hackerPages?.renderSchedule));
 router.register('/hacker/help', () => renderWithShell('hacker-help', window.hackerPages?.renderHelp));
+router.register('/organiser/home', () => renderWithShell('organiser-dashboard', window.organiserPages?.renderDashboard));
 router.register('/organiser/dashboard', () => renderWithShell('organiser-dashboard', window.organiserPages?.renderDashboard));
 router.register('/organiser/groups', () => renderWithShell('organiser-groups', window.organiserPages?.renderGroups));
 router.register('/organiser/registrations', () => renderWithShell('organiser-registrations', window.organiserPages?.renderRegistrations));
@@ -221,6 +303,7 @@ router.register('/organiser/stats', () => renderWithShell('organiser-stats', win
 router.register('/mentor/home', () => renderWithShell('mentor-home', window.mentorPages?.renderHome));
 router.register('/mentor/help-queue', () => renderWithShell('mentor-help', window.mentorPages?.renderHelpQueue));
 router.register('/mentor/groups', () => renderWithShell('mentor-groups', window.mentorPages?.renderGroups));
+router.register('/judge/home', () => renderWithShell('judge-projects', window.judgePages?.renderProjects));
 router.register('/judge/projects', () => renderWithShell('judge-projects', window.judgePages?.renderProjects));
 router.register('/judge/score', () => renderWithShell('judge-score', window.judgePages?.renderScore));
 

@@ -31,7 +31,7 @@ public class ConvexClient {
     }
 
     private String sendRequest(String type, String path, Map<String, Object> args) throws Exception {
-        String url = deploymentUrl + "/api/" + type + "/" + path;
+        String url = deploymentUrl + "/api/" + type;
 
         StringBuilder jsonArgs = new StringBuilder("{");
         if (args != null) {
@@ -41,16 +41,18 @@ public class ConvexClient {
                 jsonArgs.append("\"").append(entry.getKey()).append("\":");
                 Object value = entry.getValue();
                 if (value instanceof String) {
-                    jsonArgs.append("\"").append(value).append("\"");
-                } else {
+                    jsonArgs.append("\"").append(escapeJson((String) value)).append("\"");
+                } else if (value instanceof Number || value instanceof Boolean) {
                     jsonArgs.append(value);
+                } else {
+                    jsonArgs.append("\"").append(value).append("\"");
                 }
                 i++;
             }
         }
         jsonArgs.append("}");
 
-        String body = "{\"args\":" + jsonArgs + "}";
+        String body = "{\"path\":\"" + escapeJson(path) + "\",\"args\":" + jsonArgs + "}";
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -64,5 +66,13 @@ public class ConvexClient {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return response.body();
+    }
+
+    private String escapeJson(String s) {
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

@@ -61,13 +61,12 @@ task packageApp(type: Exec) {
             if (png.exists()) iconPath = png.path
         }
 
-        def typeFlag = platform.isWindows() ? "--type msi" :
-                        platform.isMacOsX() ? "--type dmg" :
-                        "--type deb"
+        def typeParts = platform.isWindows() ? ["--type", "msi"] :
+                        platform.isMacOsX() ? ["--type", "dmg"] :
+                        ["--type", "deb"]
 
         executable = "jpackage"
-        args = [
-            typeFlag,
+        args = typeParts + [
             "--name", "HackStation",
             "--app-version", appVersion,
             "--vendor", "Hackathon",

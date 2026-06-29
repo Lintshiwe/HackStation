@@ -6,6 +6,10 @@ export const updateProfile = mutation({
     userId: v.id("users"),
     name: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    age: v.optional(v.number()),
+    role: v.optional(v.union(v.literal("hacker"), v.literal("mentor"), v.literal("organiser"), v.literal("judge"))),
+    passwordHash: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args;

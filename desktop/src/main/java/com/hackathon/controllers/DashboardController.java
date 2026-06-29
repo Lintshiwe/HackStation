@@ -19,7 +19,7 @@ public class DashboardController {
     private final ConvexClient convex;
 
     public DashboardController() {
-        String convexUrl = System.getenv().getOrDefault("CONVEX_URL", "http://localhost:8000");
+        String convexUrl = System.getenv().getOrDefault("CONVEX_URL", "https://amiable-crocodile-549.convex.cloud");
         this.convex = new ConvexClient(convexUrl);
     }
 

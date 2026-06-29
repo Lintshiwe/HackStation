@@ -20,7 +20,7 @@ public class ChatController {
     private final ConvexClient convex;
 
     public ChatController() {
-        String convexUrl = System.getenv().getOrDefault("CONVEX_URL", "http://localhost:8000");
+        String convexUrl = System.getenv().getOrDefault("CONVEX_URL", "https://amiable-crocodile-549.convex.cloud");
         this.convex = new ConvexClient(convexUrl);
     }
 

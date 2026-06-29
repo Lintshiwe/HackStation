@@ -18,3 +18,6 @@ web/public/whatsapp-qr.png
 
 .env.local
 docs/superpowers/
+
+# Local Netlify folder
+.netlify

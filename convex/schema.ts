@@ -10,6 +10,8 @@ export default defineSchema({
     role: v.union(v.literal("hacker"), v.literal("mentor"), v.literal("organiser"), v.literal("judge")),
     status: v.union(v.literal("active"), v.literal("banned")),
     lastActiveAt: v.number(),
+    gender: v.optional(v.string()),
+    age: v.optional(v.number()),
     discordUserId: v.optional(v.string()),
     discordUsername: v.optional(v.string()),
   }).index("by_email", ["email"])

@@ -2,7 +2,13 @@ class Router {
   constructor() {
     this.routes = {};
     this.currentPage = null;
-    window.addEventListener('hashchange', () => this.handleRoute());
+    this._lastPath = null;
+    window.addEventListener('hashchange', () => {
+      const path = this.getCurrentPath();
+      if (path === this._lastPath) return;
+      this._lastPath = path;
+      this.handleRoute();
+    });
   }
 
   register(path, handler) {
@@ -10,7 +16,9 @@ class Router {
   }
 
   navigate(path) {
+    this._lastPath = path;
     window.location.hash = path;
+    this.handleRoute();
   }
 
   getCurrentPath() {

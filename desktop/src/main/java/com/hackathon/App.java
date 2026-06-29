@@ -3,6 +3,7 @@ package com.hackathon;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -12,6 +13,7 @@ public class App extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/login.fxml"));
         Scene scene = new Scene(loader.load(), 1024, 768);
         primaryStage.setTitle("HackStation");
+        primaryStage.getIcons().add(new Image(getClass().getResource("/HacStationLogo.png").toExternalForm()));
         primaryStage.setScene(scene);
         primaryStage.show();
     }

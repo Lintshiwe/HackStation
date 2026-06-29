@@ -30,7 +30,7 @@ export const register = mutation({
       lastActiveAt: Date.now(),
     });
 
-    return { userId, role: "hacker" };
+    return { userId, name: args.name, email: args.email, role: "hacker" };
   },
 });
 
